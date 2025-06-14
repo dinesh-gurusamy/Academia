@@ -1,1 +1,1 @@
-export const BASE_URL = 'http://localhost:5000/api';
+export const BASE_URL = 'https://academia-1-c0bl.onrender.com';
