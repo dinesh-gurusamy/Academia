@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import { BASE_URL } from '../api/config';
+import { BASE_URL } from '../../../backend/public/dist/config';
 
 const Upload = () => {
   const [formData, setFormData] = useState({
