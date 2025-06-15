@@ -1,1 +1,1 @@
-export const BASE_URL = import.meta.env.VITE_API_URL;
+export const BASE_URL = 'https://academia-1-c0bl.onrender.com/api';
