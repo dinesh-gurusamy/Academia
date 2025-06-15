@@ -85,6 +85,14 @@ const Login = () => {
             Forgot Password?
           </a>
         </div>
+        <div className="text-center mt-2">
+          <p className="text-center text-sm mt-4">
+  New User?{' '}
+  <a href="/register" className="text-orange-500 hover:underline">
+    Click to register
+  </a>
+</p>
+        </div>
       </div>
     </div>
   );

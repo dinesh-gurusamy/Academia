@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { BASE_URL } from '../api/config';
+import { FaCloudUploadAlt } from 'react-icons/fa';
 
 const Upload = () => {
   const [formData, setFormData] = useState({
@@ -75,135 +76,156 @@ const Upload = () => {
   };
 
   return (
-    <div className="min-h-screen  flex items-center justify-center px-4 py-12">
-      <div className="w-full max-w 0  -inset-02xl bg-white shadow-lg rounded-xl p-6 sm:p-10">
-        <h2 className="text-2xl sm:text-3xl font-bold text-center text-orange-500 mb-6">
-          <i className="fas fa-cloud-upload-alt mr-2" /> Upload a Resource
-        </h2>
+    <div className="min-h-screen flex flex-col justify-between text-gray-800">
+      {/* Header */}
+      <section className="text-center py-10 px-4">
+        <div className="max-w-4xl mx-auto">
+          <h2 className="text-4xl font-bold mb-4 text-orange-500">
+            <FaCloudUploadAlt className="inline-block mr-2" />
+            Upload a Resource
+          </h2>
+          <p className="text-md text-gray-600 mb-6">
+            Share your academic materials with the community.
+          </p>
+        </div>
+      </section>
 
-        <form onSubmit={handleSubmit} className="space-y-5">
-          {/* Title */}
-          <div>
-            <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-1">
-              Title
-            </label>
-            <input
-              type="text"
-              name="title"
-              value={formData.title}
-              onChange={handleChange}
-              required
-              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-orange-400 focus:outline-none"
-            />
-          </div>
+      {/* Form Section */}
+      <section className="flex justify-center px-4">
+        <div className="max-w-2xl w-full bg-gray-50 shadow-lg rounded-xl p-8 mb-10">
+          <form onSubmit={handleSubmit} className="space-y-6">
+            {/* Title */}
+            <div>
+              <label htmlFor="title" className="block font-semibold text-gray-700 mb-1">
+                Title
+              </label>
+              <input
+                type="text"
+                name="title"
+                value={formData.title}
+                onChange={handleChange}
+                required
+                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-orange-500 outline-none"
+              />
+            </div>
 
-          {/* Year with Suggestions */}
-          <div className="relative">
-            <label htmlFor="year" className="block text-sm font-medium text-gray-700 mb-1">
-              Year
-            </label>
-            <input
-              type="text"
-              name="year"
-              value={formData.year}
-              onChange={handleChange}
-              onFocus={() => setShowYearSuggestions(true)}
-              required
-              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-orange-400 focus:outline-none"
-            />
-            {showYearSuggestions && (
-              <ul className="absolute bg-white border border-gray-200 rounded-md mt-1 w-full z-10">
-                {yearSuggestions.map((year) => (
-                  <li
-                    key={year}
-                    className="px-4 py-2 cursor-pointer hover:bg-orange-100 text-sm"
-                    onClick={() => selectSuggestion('year', year)}
-                  >
-                    {year}
-                  </li>
-                ))}
-              </ul>
-            )}
-          </div>
+            {/* Year with Suggestions */}
+            <div className="relative">
+              <label htmlFor="year" className="block font-semibold text-gray-700 mb-1">
+                Year
+              </label>
+              <input
+                type="text"
+                name="year"
+                value={formData.year}
+                onChange={handleChange}
+                onFocus={() => setShowYearSuggestions(true)}
+                required
+                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-orange-500 outline-none"
+              />
+              {showYearSuggestions && (
+                <ul className="absolute bg-white border border-gray-200 rounded-md mt-1 w-full z-10">
+                  {yearSuggestions.map((year) => (
+                    <li
+                      key={year}
+                      className="px-4 py-2 cursor-pointer hover:bg-orange-100 text-sm"
+                      onClick={() => selectSuggestion('year', year)}
+                    >
+                      {year}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
 
-          {/* Subject Code */}
-          <div>
-            <label htmlFor="subjectCode" className="block text-sm font-medium text-gray-700 mb-1">
-              Subject Code
-            </label>
-            <input
-              type="text"
-              name="subjectCode"
-              value={formData.subjectCode}
-              onChange={handleChange}
-              required
-              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-orange-400 focus:outline-none"
-            />
-          </div>
+            {/* Subject Code */}
+            <div>
+              <label htmlFor="subjectCode" className="block font-semibold text-gray-700 mb-1">
+                Subject Code
+              </label>
+              <input
+                type="text"
+                name="subjectCode"
+                value={formData.subjectCode}
+                onChange={handleChange}
+                required
+                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-orange-500 outline-none"
+              />
+            </div>
 
-          {/* Exam Type with Suggestions */}
-          <div className="relative">
-            <label htmlFor="examType" className="block text-sm font-medium text-gray-700 mb-1">
-              Exam Type
-            </label>
-            <input
-              type="text"
-              name="examType"
-              value={formData.examType}
-              onChange={handleChange}
-              onFocus={() => setShowExamTypeSuggestions(true)}
-              required
-              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-orange-400 focus:outline-none"
-            />
-            {showExamTypeSuggestions && (
-              <ul className="absolute bg-white border border-gray-200 rounded-md mt-1 w-full z-10">
-                {examTypeSuggestions.map((type) => (
-                  <li
-                    key={type}
-                    className="px-4 py-2 cursor-pointer hover:bg-orange-100 text-sm"
-                    onClick={() => selectSuggestion('examType', type)}
-                  >
-                    {type}
-                  </li>
-                ))}
-              </ul>
-            )}
-          </div>
+            {/* Exam Type with Suggestions */}
+            <div className="relative">
+              <label htmlFor="examType" className="block font-semibold text-gray-700 mb-1">
+                Exam Type
+              </label>
+              <input
+                type="text"
+                name="examType"
+                value={formData.examType}
+                onChange={handleChange}
+                onFocus={() => setShowExamTypeSuggestions(true)}
+                required
+                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-orange-500 outline-none"
+              />
+              {showExamTypeSuggestions && (
+                <ul className="absolute bg-white border border-gray-200 rounded-md mt-1 w-full z-10">
+                  {examTypeSuggestions.map((type) => (
+                    <li
+                      key={type}
+                      className="px-4 py-2 cursor-pointer hover:bg-orange-100 text-sm"
+                      onClick={() => selectSuggestion('examType', type)}
+                    >
+                      {type}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
 
-          {/* File Upload */}
-          <div>
-            <label htmlFor="file" className="block text-sm font-medium text-gray-700 mb-1">
-              Upload File
-            </label>
-            <input
-              type="file"
-              name="file"
-              onChange={handleChange}
-              required
-              className="w-full border border-gray-300 rounded-md px-4 py-2 text-sm file:bg-orange-500 file:text-white file:border-none file:px-4 file:py-2 file:rounded-md file:cursor-pointer"
-            />
-          </div>
+            {/* File Upload */}
+            <div>
+              <label htmlFor="file" className="block font-semibold text-gray-700 mb-1">
+                Upload File <FaCloudUploadAlt className="inline-block ml-1 text-orange-500" />
+              </label>
+              <input
+                type="file"
+                name="file"
+                onChange={handleChange}
+                required
+                className="w-full py-2 border border-dashed border-gray-400 rounded-md text-sm"
+              />
+              {formData.file && <p className="text-sm text-gray-500 mt-1">{formData.file.name}</p>}
+            </div>
 
-          {/* Submit Button */}
-          <button
-            type="submit"
-            className="w-full py-2 bg-orange-500 hover:bg-orange-600 text-white font-semibold rounded-md transition"
-          >
-            <i className="fas fa-upload mr-2" /> Upload
-          </button>
-
-          {/* Message */}
-          {message && (
-            <p
-              className={`text-center text-sm mt-3 ${
-                message.toLowerCase().includes('success') ? 'text-green-600' : 'text-red-600'
-              }`}
+            {/* Submit Button */}
+            <button
+              type="submit"
+              className="w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3 rounded-md transition duration-300"
             >
-              {message}
-            </p>
-          )}
-        </form>
-      </div>
+              <FaCloudUploadAlt className="inline-block mr-2" />
+              Upload
+            </button>
+
+            {/* Message */}
+            {message && (
+              <p
+                className={`text-center text-sm mt-3 font-medium ${
+                  message.toLowerCase().includes('success') ? 'text-green-600' : 'text-red-600'
+                }`}
+              >
+                {message}
+              </p>
+            )}
+          </form>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="mt-auto py-6 border-t text-center">
+        <div className="text-sm text-gray-600">
+          © 2025 <span className="text-orange-500 font-medium">Academia Platform</span>. All rights reserved.
+        </div>
+      </footer>
     </div>
   );
 };
