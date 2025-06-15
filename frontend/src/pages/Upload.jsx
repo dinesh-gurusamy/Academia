@@ -53,7 +53,7 @@ const Upload = () => {
     formDataToSend.append('file', file);
 
     try {
-      const response = await axios.post(`${import.meta.env.VITE_API_URL}/resources/upload`, formDataToSend, {
+      const response = await axios.post(`${BASE_URL}/resources/upload`, formDataToSend, {
         headers: {
           Authorization: `Bearer ${token}`,
           'Content-Type': 'multipart/form-data',

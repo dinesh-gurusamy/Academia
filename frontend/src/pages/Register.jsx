@@ -16,7 +16,7 @@ const Register = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post(`${import.meta.env.VITE_API_URL}/auth/register`, credentials);
+      const response = await axios.post(`${BASE_URL}/auth/register`, credentials);
       setMessage(response.data.message);
       navigate('/login');
     } catch (error) {
