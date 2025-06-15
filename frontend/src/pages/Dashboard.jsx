@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { BASE_URL } from '../../../backend/public/dist/config';
+import { BASE_URL } from '../api/config';
 import { useNavigate } from 'react-router-dom';
 import { FaFileAlt, FaEye, FaEdit, FaTrash } from 'react-icons/fa';
 
