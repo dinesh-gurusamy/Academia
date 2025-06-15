@@ -16,6 +16,7 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
+      console.log("BASE_URL:", BASE_URL);
       const response = await axios.post(`${BASE_URL}/auth/login`, credentials);
       const { token, role } = response.data;
 
