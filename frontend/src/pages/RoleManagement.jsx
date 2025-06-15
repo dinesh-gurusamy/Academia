@@ -52,7 +52,7 @@ const RoleManagement = () => {
   };
 
   return (
-    <div className="min-h-screen bg-white text-gray-800 py-12 px-4">
+    <div className="min-h-screen text-gray-800 py-12 px-4">
       <div className="max-w-6xl mx-auto">
         <h1 className="text-3xl font-bold text-center text-orange-500 mb-8">Role Management</h1>
 
