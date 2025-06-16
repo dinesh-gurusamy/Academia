@@ -228,7 +228,8 @@ const Dashboard = () => {
 
                   <div className="mt-4 flex flex-wrap justify-start gap-2">
                     <a
-                      href={`https://academia-1-c0bl.onrender.com/${resource.filePath}`}
+                    href={resource.filePath}
+
                       target="_blank"
                       rel="noopener noreferrer"
                       className="flex items-center px-3 py-1 text-sm border border-orange-600 text-orange-600 rounded hover:bg-orange-600 hover:text-white transition"
