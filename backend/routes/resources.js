@@ -1,22 +1,29 @@
 const express = require('express');
 const multer = require('multer');
-const fs = require('fs'); // Required for file deletion
+const fs = require('fs');
+const path = require('path');
 const Resource = require('../models/Resource');
 const authMiddleware = require('../middleware/auth');
 
 const router = express.Router();
 
-// Configure multer for file uploads
+// Ensure uploads folder exists
+const uploadsDir = path.join(__dirname, '..', 'uploads');
+if (!fs.existsSync(uploadsDir)) {
+  fs.mkdirSync(uploadsDir);
+}
+
+// Configure multer
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, 'uploads/'); // Specify the destination folder for uploads
+    cb(null, uploadsDir);
   },
   filename: (req, file, cb) => {
-    cb(null, Date.now() + '-' + file.originalname); // Specify the filename
+    cb(null, Date.now() + '-' + file.originalname);
   },
 });
 
-const upload = multer({ storage }); // Create the multer instance
+const upload = multer({ storage });
 
 // Get all resources
 router.get('/', authMiddleware.isAuthenticated, async (req, res) => {
@@ -28,89 +35,82 @@ router.get('/', authMiddleware.isAuthenticated, async (req, res) => {
   }
 });
 
-// Get a specific resource by ID
+// Upload a resource
+router.post('/upload', authMiddleware.isAuthenticated, authMiddleware.isFacultyOrAdmin, upload.single('file'), async (req, res) => {
+  try {
+    const { title, year, subjectCode, examType } = req.body;
+    if (!title || !year || !subjectCode || !examType || !req.file) {
+      return res.status(400).json({ error: 'All fields are required' });
+    }
+    
+    const fileUrl = `${req.protocol}://${req.get('host')}/uploads/${req.file.filename}`;
+
+    const resource = new Resource({
+      title,
+      year,
+      subjectCode,
+      examType,
+      filePath: fileUrl, // <-- full public URL saved
+    });
+
+    await resource.save();
+
+    res.status(201).json({ message: 'Resource uploaded successfully', fileUrl: resource.filePath });
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+});
+
+// Download resource by ID
 router.get('/:id', authMiddleware.isAuthenticated, async (req, res) => {
   try {
     const resource = await Resource.findById(req.params.id);
-    if (!resource) {
-      return res.status(404).json({ error: 'Resource not found' });
-    }
+    if (!resource) return res.status(404).json({ error: 'Resource not found' });
     res.json(resource);
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
 });
 
-// Upload a resource (Faculty and Admin only)
-router.post('/upload', authMiddleware.isAuthenticated, authMiddleware.isFacultyOrAdmin, upload.single('file'), async (req, res) => {
-  try {
-    const { title, year, subjectCode, examType } = req.body;
-    const filePath = req.file.path;
-
-    // Validate required fields
-    if (!title || !year || !subjectCode || !examType || !filePath) {
-      return res.status(400).json({ error: 'All fields are required' });
-    }
-
-    const resource = new Resource({ title, year, subjectCode, examType, filePath });
-    await resource.save();
-
-    res.status(201).json({ message: 'Resource uploaded successfully' });
-  } catch (error) {
-    res.status(400).json({ error: error.message });
-  }
-});
-
-// Update a resource (Faculty and Admin only)
+// Update resource
 router.put('/:id', authMiddleware.isAuthenticated, authMiddleware.isFacultyOrAdmin, upload.single('file'), async (req, res) => {
   try {
     const { title, year, subjectCode, examType } = req.body;
     const resource = await Resource.findById(req.params.id);
+    if (!resource) return res.status(404).json({ error: 'Resource not found' });
 
-    if (!resource) {
-      return res.status(404).json({ error: 'Resource not found' });
-    }
-
-    // Update resource fields
+    // Update fields
     resource.title = title || resource.title;
     resource.year = year || resource.year;
     resource.subjectCode = subjectCode || resource.subjectCode;
     resource.examType = examType || resource.examType;
 
-    // If a new file is uploaded, update the file path
     if (req.file) {
-      // Delete the old file if necessary
-      fs.unlink(resource.filePath, (err) => {
-        if (err) {
-          console.error('Error deleting file:', err);
-        }
+      // Delete old file
+      fs.unlink(path.join(__dirname, '..', resource.filePath), (err) => {
+        if (err) console.error('Error deleting file:', err);
       });
-      resource.filePath = req.file.path;
+      resource.filePath = `/uploads/${req.file.filename}`;
     }
 
     await resource.save();
-    res.json({ message: 'Resource updated successfully' });
+    res.json({ message: 'Resource updated successfully', fileUrl: resource.filePath });
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
 });
 
-// Delete a resource (Admin only)
+// Delete resource
 router.delete('/:id', authMiddleware.isAuthenticated, authMiddleware.isAdmin, async (req, res) => {
   try {
     const resource = await Resource.findById(req.params.id);
-    if (!resource) {
-      return res.status(404).json({ error: 'Resource not found' });
-    }
+    if (!resource) return res.status(404).json({ error: 'Resource not found' });
 
-    // Delete the file from the uploads folder
-    fs.unlink(resource.filePath, (err) => {
-      if (err) {
-        console.error('Error deleting file:', err);
-      }
+    // Delete file
+    fs.unlink(path.join(__dirname, '..', resource.filePath), (err) => {
+      if (err) console.error('Error deleting file:', err);
     });
 
-    // Delete the resource from the database
     await resource.deleteOne();
     res.json({ message: 'Resource deleted successfully' });
   } catch (error) {
