@@ -11,6 +11,7 @@ const storage = new CloudinaryStorage({
   cloudinary,
   params: {
     folder: 'academia-resources',
+    resource_type: 'raw',
     allowed_formats: ['pdf'],
   },
 });
