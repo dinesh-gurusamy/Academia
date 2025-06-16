@@ -13,7 +13,7 @@ const storage = new CloudinaryStorage({
     folder: 'academia-resources',
     resource_type: 'raw', // ✅ This is critical for PDFs
     allowed_formats: ['pdf'], // Optional: restrict to PDFs
-    public_id: (req, file) => file.originalname.split('.')[0], // Keep original filename (without extension)
+    public_id: (req, file) => file.originalname.replace(/\.[^/.]+$/, ''), // Keep original filename (without extension)
   },
 });
 
