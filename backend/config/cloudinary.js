@@ -12,9 +12,11 @@ const storage = new CloudinaryStorage({
   params: {
     folder: 'academia-resources',
     resource_type: 'raw',
-    allowed_formats: ['pdf'],
+    format: 'pdf', // Force .pdf extension
+    public_id: (req, file) => file.originalname.split('.')[0], // ✅ keep original name
   },
 });
+
 
 module.exports = {
   cloudinary,
