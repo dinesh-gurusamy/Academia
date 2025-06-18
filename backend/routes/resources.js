@@ -4,6 +4,7 @@ const { storage, cloudinary } = require('../config/cloudinary'); // cloudinary c
 const Resource = require('../models/Resource');
 const authMiddleware = require('../middleware/auth');
 const path = require('path');
+const { URL } = require('url');
 
 const router = express.Router();
 const upload = multer({ storage });
@@ -109,28 +110,30 @@ router.delete('/:id', authMiddleware.isAuthenticated, authMiddleware.isAdmin, as
     const resource = await Resource.findById(req.params.id);
     if (!resource) return res.status(404).json({ error: 'Resource not found' });
 
+    // Decode and extract filename from Cloudinary URL
     const decodedUrl = decodeURIComponent(resource.filePath);
     const parsedUrl = new URL(decodedUrl);
     const segments = parsedUrl.pathname.split('/');
-    const filenameWithExt = decodeURIComponent(segments[segments.length - 1]); // ✅ decode here
-    const publicId = `academia-resources/${path.parse(filenameWithExt).name}`; // no .pdf
-// ✅ Hardcoded folder
+    const filenameWithExt = segments[segments.length - 1]; // Already decoded from above
+    const publicId = `academia-resources/${path.parse(filenameWithExt).name}`; // no extension
 
     console.log('Cloudinary Deletion Debug:');
     console.log('Original URL:', resource.filePath);
     console.log('Decoded URL:', decodedUrl);
+    console.log('Filename:', filenameWithExt);
     console.log('Final public_id:', publicId);
 
-    try {
-      const result = await cloudinary.uploader.destroy(publicId, { resource_type: 'raw' });
-      console.log('Cloudinary delete result:', result);
-    } catch (err) {
-      console.error('Cloudinary delete failed:', err);
-    }
+    // Delete from Cloudinary
+    const result = await cloudinary.uploader.destroy(publicId, {
+      resource_type: 'raw'
+    });
+
+    console.log('Cloudinary delete result:', result);
 
     await resource.deleteOne();
     res.json({ message: 'Resource and file deleted successfully' });
   } catch (error) {
+    console.error('Deletion failed:', error);
     res.status(500).json({ error: error.message });
   }
 });
