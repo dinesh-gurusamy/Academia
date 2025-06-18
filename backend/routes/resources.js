@@ -109,18 +109,22 @@ router.delete('/:id', authMiddleware.isAuthenticated, authMiddleware.isAdmin, as
     const resource = await Resource.findById(req.params.id);
     if (!resource) return res.status(404).json({ error: 'Resource not found' });
 
-    // Correctly extract public_id
     const decodedUrl = decodeURIComponent(resource.filePath);
     const parsedUrl = new URL(decodedUrl);
     const segments = parsedUrl.pathname.split('/');
-    const folder = segments[segments.length - 2];
     const filenameWithExt = segments[segments.length - 1];
-    const publicId = `${folder}/${path.parse(filenameWithExt).name}`;
+    const publicId = `academia-resources/${path.parse(filenameWithExt).name}`; // ✅ Hardcoded folder
+
+    console.log('Cloudinary Deletion Debug:');
+    console.log('Original URL:', resource.filePath);
+    console.log('Decoded URL:', decodedUrl);
+    console.log('Final public_id:', publicId);
 
     try {
-      await cloudinary.uploader.destroy(publicId, { resource_type: 'raw' });
+      const result = await cloudinary.uploader.destroy(publicId, { resource_type: 'raw' });
+      console.log('Cloudinary delete result:', result);
     } catch (err) {
-      console.error('Cloudinary delete failed:', err.message);
+      console.error('Cloudinary delete failed:', err);
     }
 
     await resource.deleteOne();
@@ -129,6 +133,3 @@ router.delete('/:id', authMiddleware.isAuthenticated, authMiddleware.isAdmin, as
     res.status(500).json({ error: error.message });
   }
 });
-
-
-module.exports = router;
