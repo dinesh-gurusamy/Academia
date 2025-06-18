@@ -112,8 +112,9 @@ router.delete('/:id', authMiddleware.isAuthenticated, authMiddleware.isAdmin, as
     const decodedUrl = decodeURIComponent(resource.filePath);
     const parsedUrl = new URL(decodedUrl);
     const segments = parsedUrl.pathname.split('/');
-    const filenameWithExt = segments[segments.length - 1];
-    const publicId = `academia-resources/${path.parse(filenameWithExt).name}`; // ✅ Hardcoded folder
+    const filenameWithExt = decodeURIComponent(segments[segments.length - 1]); // ✅ decode here
+    const publicId = `academia-resources/${path.parse(filenameWithExt).name}`; // no .pdf
+// ✅ Hardcoded folder
 
     console.log('Cloudinary Deletion Debug:');
     console.log('Original URL:', resource.filePath);
