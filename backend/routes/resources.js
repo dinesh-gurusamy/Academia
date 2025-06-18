@@ -133,3 +133,5 @@ router.delete('/:id', authMiddleware.isAuthenticated, authMiddleware.isAdmin, as
     res.status(500).json({ error: error.message });
   }
 });
+
+module.exports = router;
