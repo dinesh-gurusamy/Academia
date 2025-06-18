@@ -3,6 +3,7 @@ const multer = require('multer');
 const { storage, cloudinary } = require('../config/cloudinary'); // cloudinary config
 const Resource = require('../models/Resource');
 const authMiddleware = require('../middleware/auth');
+const path = require('path');
 
 const router = express.Router();
 const upload = multer({ storage });
@@ -102,34 +103,30 @@ router.put(
 );
 
 // Delete a resource
-const path = require('path'); // Add if not already present
 
 router.delete('/:id', authMiddleware.isAuthenticated, authMiddleware.isAdmin, async (req, res) => {
   try {
     const resource = await Resource.findById(req.params.id);
     if (!resource) return res.status(404).json({ error: 'Resource not found' });
 
-    // Extract full public_id from filePath
-    const fileUrl = resource.filePath; // e.g. https://res.cloudinary.com/.../academia-resources/dummy-1234567890.pdf
-    const parsedUrl = new URL(fileUrl);
-    const publicPath = parsedUrl.pathname; // e.g. /raw/upload/v1234/academia-resources/dummy-1234567890.pdf
-    const segments = publicPath.split('/'); // split by '/'
-    const folder = segments[segments.length - 2]; // "academia-resources"
-    const filenameWithExt = segments[segments.length - 1]; // "dummy-1234567890.pdf"
-    const publicId = `${folder}/${path.parse(filenameWithExt).name}`; // academia-resources/dummy-1234567890
+    // Correctly extract public_id
+    const decodedUrl = decodeURIComponent(resource.filePath);
+    const parsedUrl = new URL(decodedUrl);
+    const segments = parsedUrl.pathname.split('/');
+    const folder = segments[segments.length - 2];
+    const filenameWithExt = segments[segments.length - 1];
+    const publicId = `${folder}/${path.parse(filenameWithExt).name}`;
 
-    // Try to delete from Cloudinary
     try {
       await cloudinary.uploader.destroy(publicId, { resource_type: 'raw' });
     } catch (err) {
       console.error('Cloudinary delete failed:', err.message);
     }
 
-    // Delete from MongoDB
     await resource.deleteOne();
-    res.json({ message: 'Resource deleted successfully' });
+    res.json({ message: 'Resource and file deleted successfully' });
   } catch (error) {
-    res.status(400).json({ error: error.message });
+    res.status(500).json({ error: error.message });
   }
 });
 
