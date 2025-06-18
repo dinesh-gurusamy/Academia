@@ -114,7 +114,7 @@ router.delete('/:id', authMiddleware.isAuthenticated, authMiddleware.isAdmin, as
     const decodedUrl = decodeURIComponent(resource.filePath);
     const parsedUrl = new URL(decodedUrl);
     const segments = parsedUrl.pathname.split('/');
-    const filenameWithExt = segments[segments.length - 1]; // Already decoded from above
+   const filenameWithExt = decodeURIComponent(segments[segments.length - 1]);// Already decoded from above
     const publicId = `academia-resources/${path.parse(filenameWithExt).name}`; // no extension
 
     console.log('Cloudinary Deletion Debug:');
