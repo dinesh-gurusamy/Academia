@@ -37,7 +37,8 @@ router.post(
         year,
         subjectCode,
         examType,
-        filePath: req.file.path, // ✅ Cloudinary URL
+        filePath: req.file.path,
+        cloudinaryId: req.file.filename  // ✅ Cloudinary URL
       });
 
       await resource.save();
@@ -107,34 +108,31 @@ router.put(
 
 router.delete('/:id', authMiddleware.isAuthenticated, authMiddleware.isAdmin, async (req, res) => {
   try {
+    // Find the resource in MongoDB
     const resource = await Resource.findById(req.params.id);
-    if (!resource) return res.status(404).json({ error: 'Resource not found' });
+    if (!resource) {
+      return res.status(404).json({ error: 'Resource not found' });
+    }
 
-    // Decode and extract filename from Cloudinary URL
-    const decodedUrl = decodeURIComponent(resource.filePath);
-    const parsedUrl = new URL(decodedUrl);
-    const segments = parsedUrl.pathname.split('/');
-   const filenameWithExt = decodeURIComponent(segments[segments.length - 1]);// Already decoded from above
-    const publicId = `academia-resources/${path.parse(filenameWithExt).name}`; // no extension
+    // Construct public_id using folder and saved filename (cloudinaryId)
+    const publicId = `academia-resources/${resource.cloudinaryId}`;
 
-    console.log('Cloudinary Deletion Debug:');
-    console.log('Original URL:', resource.filePath);
-    console.log('Decoded URL:', decodedUrl);
-    console.log('Filename:', filenameWithExt);
-    console.log('Final public_id:', publicId);
+    console.log('➡️ Deleting from Cloudinary:', publicId);
 
-    // Delete from Cloudinary
+    // Delete file from Cloudinary (for non-images: use `resource_type: 'raw'`)
     const result = await cloudinary.uploader.destroy(publicId, {
-      resource_type: 'raw'
+      resource_type: 'raw',
     });
 
-    console.log('Cloudinary delete result:', result);
+    console.log('✅ Cloudinary response:', result);
 
+    // Delete resource from MongoDB
     await resource.deleteOne();
+
     res.json({ message: 'Resource and file deleted successfully' });
   } catch (error) {
-    console.error('Deletion failed:', error);
-    res.status(500).json({ error: error.message });
+    console.error('❌ Deletion error:', error.message);
+    res.status(500).json({ error: 'Internal Server Error' });
   }
 });
 

@@ -6,6 +6,7 @@ const resourceSchema = new mongoose.Schema({
   subjectCode: { type: String, required: true },
   examType: { type: String, required: true },
   filePath: { type: String, required: true },
+  cloudinaryId: { type: String, required: true },
   createdAt: { type: Date, default: Date.now },
 });
 
