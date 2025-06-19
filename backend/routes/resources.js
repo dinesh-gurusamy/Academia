@@ -115,7 +115,7 @@ router.delete('/:id', authMiddleware.isAuthenticated, authMiddleware.isAdmin, as
     }
 
     // Construct public_id using folder and saved filename (cloudinaryId)
-    const publicId = `academia-resources/${resource.cloudinaryId}`;
+    const publicId = resource.cloudinaryId;
 
     console.log('➡️ Deleting from Cloudinary:', publicId);
 
@@ -135,5 +135,4 @@ router.delete('/:id', authMiddleware.isAuthenticated, authMiddleware.isAdmin, as
     res.status(500).json({ error: 'Internal Server Error' });
   }
 });
-
 module.exports = router;
