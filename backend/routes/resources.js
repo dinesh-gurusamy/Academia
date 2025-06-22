@@ -76,33 +76,39 @@ router.put(
       const resource = await Resource.findById(req.params.id);
       if (!resource) return res.status(404).json({ error: 'Resource not found' });
 
+      // Update text fields
       resource.title = title || resource.title;
       resource.year = year || resource.year;
       resource.subjectCode = subjectCode || resource.subjectCode;
       resource.examType = examType || resource.examType;
 
+      // 🧼 Replace PDF if new file uploaded
       if (req.file) {
-        // Optional: delete old Cloudinary file by public_id
-        const publicId = resource.filePath.split('/').pop().split('.')[0];
-        try {
-          await cloudinary.uploader.destroy(`academia-resources/${publicId}`);
-        } catch (err) {
-          console.error('Cloudinary delete failed:', err.message);
+        // ✅ Delete old file from Cloudinary
+        if (resource.cloudinaryId) {
+          await cloudinary.uploader.destroy(resource.cloudinaryId, {
+            resource_type: 'raw',
+          });
         }
 
+        // ✅ Save new file details
         resource.filePath = req.file.path;
+        resource.cloudinaryId = req.file.filename;
       }
 
       await resource.save();
+
       res.json({
         message: 'Resource updated successfully',
         fileUrl: resource.filePath,
       });
     } catch (error) {
-      res.status(400).json({ error: error.message });
+      console.error('Edit error:', error.message);
+      res.status(500).json({ error: 'Error while updating the resource' });
     }
   }
 );
+
 
 // Delete a resource
 
