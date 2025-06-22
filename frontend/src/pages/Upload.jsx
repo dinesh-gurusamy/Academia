@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { BASE_URL } from '../api/config';
 import { FaCloudUploadAlt } from 'react-icons/fa';
@@ -13,6 +13,8 @@ const Upload = () => {
   });
 
   const [message, setMessage] = useState('');
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
   const [showExamTypeSuggestions, setShowExamTypeSuggestions] = useState(false);
   const [showYearSuggestions, setShowYearSuggestions] = useState(false);
 
@@ -34,15 +36,21 @@ const Upload = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
+    setError('');
+    setMessage('');
+
     const token = localStorage.getItem('token');
     if (!token) {
-      setMessage('You must be logged in to upload resources.');
+      setError('You must be logged in to upload resources.');
+      setLoading(false);
       return;
     }
 
     const { title, year, subjectCode, examType, file } = formData;
     if (!title || !year || !subjectCode || !examType || !file) {
-      setMessage('All fields are required.');
+      setError('All fields are required.');
+      setLoading(false);
       return;
     }
 
@@ -61,12 +69,14 @@ const Upload = () => {
         },
       });
 
-      setMessage(response.data.message);
+      setMessage(response.data.message || 'Resource uploaded successfully!');
       setFormData({ title: '', year: '', subjectCode: '', examType: '', file: null });
       setShowExamTypeSuggestions(false);
       setShowYearSuggestions(false);
-    } catch (error) {
-      setMessage(error.response?.data?.error || 'An error occurred while uploading the resource.');
+    } catch (err) {
+      setError(err.response?.data?.error || 'An error occurred while uploading the resource.');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -74,6 +84,25 @@ const Upload = () => {
     setFormData({ ...formData, [field]: value });
     field === 'examType' ? setShowExamTypeSuggestions(false) : setShowYearSuggestions(false);
   };
+
+  useEffect(() => {
+    if (message) {
+      const timeout = setTimeout(() => setMessage(''), 4000);
+      return () => clearTimeout(timeout);
+    }
+  }, [message]);
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-screen text-orange-500">
+        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-orange-500"></div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return <div className="text-center mt-10 text-red-600 font-medium">{error}</div>;
+  }
 
   return (
     <div className="min-h-screen flex flex-col justify-between text-gray-800">

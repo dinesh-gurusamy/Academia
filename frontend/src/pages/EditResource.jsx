@@ -32,20 +32,26 @@ const EditResource = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     const formData = new FormData();
     formData.append('title', resource.title);
     formData.append('year', resource.year);
     formData.append('subjectCode', resource.subjectCode);
     formData.append('examType', resource.examType);
-    if (file) formData.append('file', file);
+    if (file) {
+      formData.append('file', file);
+    }
 
     try {
       const token = localStorage.getItem('token');
-      await axios.put(`${BASE_URL}/resources/${id}`, formData, {
-        headers: { Authorization: `Bearer ${token}` },
+      const response = await axios.put(`${BASE_URL}/resources/${id}`, formData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'multipart/form-data',
+        },
       });
-      setMessage('Resource updated successfully!');
-      setTimeout(() => navigate('/dashboard'), 2000);
+      setMessage(response.data.message || 'Updated!');
+      setTimeout(() => navigate('/dashboard'), 1500);
     } catch (error) {
       setError(error.response?.data?.error || 'Error while updating the resource.');
     }
@@ -69,74 +75,62 @@ const EditResource = () => {
         </div>
       </section>
 
-      {/* Form Section */}
+      {/* Form */}
       <section className="flex justify-center px-4">
         <div className="max-w-2xl w-full bg-gray-50 shadow-lg rounded-xl p-8 mb-10">
           <form onSubmit={handleSubmit} encType="multipart/form-data" className="space-y-6">
-            {/* Title */}
+
             <div>
-              <label htmlFor="title" className="block font-semibold text-gray-700 mb-1">
-                Title
-              </label>
+              <label htmlFor="title" className="block font-semibold mb-1">Title</label>
               <input
                 type="text"
                 id="title"
-                value={resource.title}
+                value={resource.title || ''}
                 onChange={(e) => setResource({ ...resource, title: e.target.value })}
                 required
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-orange-500 outline-none"
+                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-orange-500"
               />
             </div>
 
-            {/* Year */}
             <div>
-              <label htmlFor="year" className="block font-semibold text-gray-700 mb-1">
-                Year
-              </label>
+              <label htmlFor="year" className="block font-semibold mb-1">Year</label>
               <input
                 type="text"
                 id="year"
-                value={resource.year}
+                value={resource.year || ''}
                 onChange={(e) => setResource({ ...resource, year: e.target.value })}
                 required
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-orange-500 outline-none"
+                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-orange-500"
               />
             </div>
 
-            {/* Subject Code */}
             <div>
-              <label htmlFor="subjectCode" className="block font-semibold text-gray-700 mb-1">
-                Subject Code
-              </label>
+              <label htmlFor="subjectCode" className="block font-semibold mb-1">Subject Code</label>
               <input
                 type="text"
                 id="subjectCode"
-                value={resource.subjectCode}
+                value={resource.subjectCode || ''}
                 onChange={(e) => setResource({ ...resource, subjectCode: e.target.value })}
                 required
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-orange-500 outline-none"
+                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-orange-500"
               />
             </div>
 
-            {/* Exam Type */}
             <div>
-              <label htmlFor="examType" className="block font-semibold text-gray-700 mb-1">
-                Exam Type
-              </label>
+              <label htmlFor="examType" className="block font-semibold mb-1">Exam Type</label>
               <input
                 type="text"
                 id="examType"
-                value={resource.examType}
+                value={resource.examType || ''}
                 onChange={(e) => setResource({ ...resource, examType: e.target.value })}
                 required
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-orange-500 outline-none"
+                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-orange-500"
               />
             </div>
 
-            {/* File Upload */}
             <div>
-              <label htmlFor="file" className="block font-semibold text-gray-700 mb-1">
-                Upload File <FaFileUpload className="inline-block ml-1 text-orange-500" />
+              <label htmlFor="file" className="block font-semibold mb-1">
+                Replace File <FaFileUpload className="inline-block text-orange-500 ml-1" />
               </label>
               <input
                 type="file"
@@ -144,31 +138,37 @@ const EditResource = () => {
                 onChange={(e) => setFile(e.target.files[0])}
                 className="w-full py-2 border border-dashed border-gray-400 rounded-md text-sm"
               />
+              {!file && resource.filePath && (
+                <p className="text-sm text-gray-600 mt-2">
+                  Current file: <a href={resource.filePath} target="_blank" rel="noreferrer" className="text-orange-500 underline">View current file</a>
+                </p>
+              )}
               {file && <p className="text-sm text-gray-500 mt-1">{file.name}</p>}
             </div>
 
-            {/* Submit Button */}
             <button
               type="submit"
-              className="w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3 rounded-md transition duration-300"
+              className="w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3 rounded-md transition"
             >
               Update Resource
             </button>
 
-            {/* Success Message */}
-            {message && <p className="text-center text-green-600 font-medium">{message}</p>}
+            {message && (
+              <p className="text-center text-green-600 font-medium mt-2">{message}</p>
+            )}
+            {error && (
+              <p className="text-center text-red-600 font-medium mt-2">{error}</p>
+            )}
           </form>
         </div>
       </section>
 
-      {/* Footer */}
       <footer className="mt-auto py-6 border-t text-center">
-        <div className="text-sm text-gray-600">
-          © 2025 <span className="text-orange-500 font-medium">Academia Platform</span>. All rights reserved.
-        </div>
+        <p className="text-sm text-gray-600">© 2025 <span className="text-orange-500 font-medium">Academia Platform</span>. All rights reserved.</p>
       </footer>
     </div>
   );
 };
 
 export default EditResource;
+  

@@ -29,7 +29,6 @@ const Dashboard = () => {
     }
 
     fetchResources();
-    // eslint-disable-next-line
   }, [navigate]);
 
   const fetchResources = async () => {
