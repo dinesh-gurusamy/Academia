@@ -148,9 +148,20 @@ const EditResource = () => {
 
             <button
               type="submit"
-              className="w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3 rounded-md transition"
+              disabled={loading}
+              className="w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3 rounded-md transition duration-300 flex justify-center items-center"
             >
-              Update Resource
+              {loading ? (
+                <>
+                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+                  Updating...
+                </>
+              ) : (
+                <>
+                  <FaEdit className="mr-2" />
+                  Update Resource
+                </>
+              )}
             </button>
 
             {message && (
@@ -171,4 +182,3 @@ const EditResource = () => {
 };
 
 export default EditResource;
-  

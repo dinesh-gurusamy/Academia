@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { BASE_URL } from '../api/config';
 import { FaCloudUploadAlt } from 'react-icons/fa';
@@ -21,6 +21,29 @@ const Upload = () => {
   const examTypeSuggestions = ['CAT-1', 'CAT-2', 'CAT-3', 'Model'];
   const currentYear = new Date().getFullYear();
   const yearSuggestions = [currentYear, currentYear - 1, currentYear - 2];
+
+  const examTypeRef = useRef(null);
+  const yearRef = useRef(null);
+
+  // Close suggestions when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        examTypeRef.current &&
+        !examTypeRef.current.contains(event.target)
+      ) {
+        setShowExamTypeSuggestions(false);
+      }
+      if (
+        yearRef.current &&
+        !yearRef.current.contains(event.target)
+      ) {
+        setShowYearSuggestions(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const handleChange = (e) => {
     const { name, value, files } = e.target;
@@ -82,7 +105,8 @@ const Upload = () => {
 
   const selectSuggestion = (field, value) => {
     setFormData({ ...formData, [field]: value });
-    field === 'examType' ? setShowExamTypeSuggestions(false) : setShowYearSuggestions(false);
+    if (field === 'examType') setShowExamTypeSuggestions(false);
+    if (field === 'year') setShowYearSuggestions(false);
   };
 
   useEffect(() => {
@@ -91,18 +115,6 @@ const Upload = () => {
       return () => clearTimeout(timeout);
     }
   }, [message]);
-
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center h-screen text-orange-500">
-        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-orange-500"></div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return <div className="text-center mt-10 text-red-600 font-medium">{error}</div>;
-  }
 
   return (
     <div className="min-h-screen flex flex-col justify-between text-gray-800">
@@ -139,7 +151,7 @@ const Upload = () => {
             </div>
 
             {/* Year with Suggestions */}
-            <div className="relative">
+            <div className="relative" ref={yearRef}>
               <label htmlFor="year" className="block font-semibold text-gray-700 mb-1">
                 Year
               </label>
@@ -149,6 +161,7 @@ const Upload = () => {
                 value={formData.year}
                 onChange={handleChange}
                 onFocus={() => setShowYearSuggestions(true)}
+                autoComplete="off"
                 required
                 className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-orange-500 outline-none"
               />
@@ -158,7 +171,7 @@ const Upload = () => {
                     <li
                       key={year}
                       className="px-4 py-2 cursor-pointer hover:bg-orange-100 text-sm"
-                      onClick={() => selectSuggestion('year', year)}
+                      onMouseDown={() => selectSuggestion('year', year)}
                     >
                       {year}
                     </li>
@@ -183,7 +196,7 @@ const Upload = () => {
             </div>
 
             {/* Exam Type with Suggestions */}
-            <div className="relative">
+            <div className="relative" ref={examTypeRef}>
               <label htmlFor="examType" className="block font-semibold text-gray-700 mb-1">
                 Exam Type
               </label>
@@ -193,6 +206,7 @@ const Upload = () => {
                 value={formData.examType}
                 onChange={handleChange}
                 onFocus={() => setShowExamTypeSuggestions(true)}
+                autoComplete="off"
                 required
                 className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-orange-500 outline-none"
               />
@@ -202,7 +216,7 @@ const Upload = () => {
                     <li
                       key={type}
                       className="px-4 py-2 cursor-pointer hover:bg-orange-100 text-sm"
-                      onClick={() => selectSuggestion('examType', type)}
+                      onMouseDown={() => selectSuggestion('examType', type)}
                     >
                       {type}
                     </li>
@@ -226,23 +240,35 @@ const Upload = () => {
               {formData.file && <p className="text-sm text-gray-500 mt-1">{formData.file.name}</p>}
             </div>
 
-            {/* Submit Button */}
+            {/* Submit Button with Spinner */}
             <button
               type="submit"
-              className="w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3 rounded-md transition duration-300"
+              disabled={loading}
+              className="w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3 rounded-md transition duration-300 flex justify-center items-center"
             >
-              <FaCloudUploadAlt className="inline-block mr-2" />
-              Upload
+              {loading ? (
+                <>
+                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+                  Uploading...
+                </>
+              ) : (
+                <>
+                  <FaCloudUploadAlt className="mr-2" />
+                  Upload
+                </>
+              )}
             </button>
 
             {/* Message */}
-            {message && (
+            {(message || error) && (
               <p
                 className={`text-center text-sm mt-3 font-medium ${
-                  message.toLowerCase().includes('success') ? 'text-green-600' : 'text-red-600'
+                  (message && message.toLowerCase().includes('success')) || !error
+                    ? 'text-green-600'
+                    : 'text-red-600'
                 }`}
               >
-                {message}
+                {message || error}
               </p>
             )}
           </form>
