@@ -39,6 +39,15 @@ router.post('/login', async (req, res) => {
 });
 
 // Fetch all users (Admin only)
+
+router.get('/hi', async (req, res) => {
+  try {
+    console.log("Hi Machi...");
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+});
+
 router.get('/users', authMiddleware.isAdmin, async (req, res) => {
   try {
     const users = await User.find({}, 'username role'); // Only fetch username and role
