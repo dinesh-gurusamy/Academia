@@ -13,7 +13,7 @@ app.use(
   cors({
     origin: [
       'http://localhost:5173',
-      'https://academia-1smr.vercel.app',
+      'https://academia-six-iota.vercel.app',
     ],
     credentials: true,
   })
