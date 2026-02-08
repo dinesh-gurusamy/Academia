@@ -8,6 +8,7 @@ const resourceRoutes = require('./routes/resources');
 
 const app = express();
 
+// Middleware
 app.use(
   cors({
     origin: [
@@ -17,21 +18,21 @@ app.use(
     credentials: true,
   })
 );
-
 app.use(express.json());
 
+// Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/resources', resourceRoutes);
 
 app.get('/', (req, res) => {
-  res.send('Local backend running 🚀');
+  res.send('Academia Backend is Live 🚀');
 });
 
+// MongoDB Connection (Vercel best practice: connect outside the handler)
 mongoose
   .connect(process.env.MONGO_URI)
-  .then(() => {
-    app.listen(5000, () =>
-      console.log('✅ Backend running on port 5000')
-    );
-  })
-  .catch(console.error);
+  .then(() => console.log('✅ MongoDB Connected'))
+  .catch((err) => console.error('❌ MongoDB Connection Error:', err));
+
+// REQUIRED FOR VERCEL: Export the app instance
+module.exports = app;
